@@ -8,11 +8,12 @@ import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
 import reducer from "./store/reducer";
-import { fetchTasks } from "./store/actions";
+import { fetchTasks, finishedTask } from "./store/actions";
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const store = createStore(reducer, composeEnhancers(applyMiddleware(thunk)));
 store.dispatch(fetchTasks());
+store.dispatch(finishedTask());
 
 ReactDOM.render(
   <React.StrictMode>

@@ -1,124 +1,52 @@
-import { useState } from "react";
+import react, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addTask, deleteTask, finishedTask } from "../store/actions";
+import { addTask, deleteTask } from "../store/actions";
 import React from "react";
-import ReactDOM from "react-dom";
-import Modal from "react-modal";
+import Modal from "./Modal";
+import TaskCard from "./TaskCard";
 
-const customStyles = {
-  content: {
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    marginRight: "-50%",
-    transform: "translate(-50%, -50%)",
-  },
-};
+var today = new Date();
+var dd = String(today.getDate()).padStart(2, "0");
+var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+var yyyy = today.getFullYear();
+
+today = yyyy + "-" + mm + "-" + dd;
+console.log(today);
 
 const TaskList = () => {
   const tasks = useSelector((state) => state.tasks);
   console.log(tasks, "helloooo");
   const dispatch = useDispatch();
-  const [query, setQuery] = useState("");
-  const [newTask, setNewTask] = useState("");
-  const [modalIsOpen, setIsOpen] = useState(false);
-  let subtitle;
-  function openModal() {
-    setIsOpen(true);
-  }
 
-  function afterOpenModal() {
-    // references are now sync'd and can be accessed.
-    subtitle.style.color = "#f00";
-  }
+  let todayTasksList = tasks
+    .filter((task) => task.deadLineDate === today && task.status === false)
+    .map((task) => <TaskCard today={today} task={task} dispatch={dispatch} />);
 
-  function closeModal() {
-    setIsOpen(false);
-  }
-  let List = tasks
-    .filter((task) => !task.status)
-    .filter((task) => task.name.toLowerCase().includes(query.toLowerCase()))
-    .map((task) => (
-      <li>
-        {task.name}
-        <div>
-          <button
-            onClick={() => dispatch(finishedTask(task.status, task.id))}
-            style={{ width: "75px", height: "20px", marginRight: "10px" }}
-          >
-            done
-          </button>
-          <button
-            onClick={() => dispatch(deleteTask(task.id))}
-            style={{ width: "60px", height: "20px" }}
-          >
-            Delete
-          </button>
-        </div>
-      </li>
-    ));
+  let futureTasksList = tasks
+    .filter((task) => task.deadLineDate > today && task.status === false)
+    .map((task) => <TaskCard today={today} task={task} dispatch={dispatch} />);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    dispatch(addTask(newTask));
-  };
-  const handleChange = (event) => {
-    setNewTask({ ...newTask, [event.target.name]: event.target.value });
-  };
+  let finishedTask = tasks
+    .filter((task) => task.status === true)
+    .map((task) => <TaskCard today={today} task={task} dispatch={dispatch} />);
+
+  let unFinishedTask = tasks
+    .filter((task) => task.status === false && task.deadLineDate < today)
+    .map((task) => <TaskCard today={today} task={task} dispatch={dispatch} />);
 
   return (
     <section>
       <h1>To Do List</h1>
-      <ul>{List}</ul>
-      <button onClick={openModal}>Open Modal</button>
-      <Modal
-        isOpen={modalIsOpen}
-        onAfterOpen={afterOpenModal}
-        onRequestClose={closeModal}
-        style={customStyles}
-        contentLabel="Example Modal"
-      >
-        <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Hello</h2>
 
-        <form onSubmit={handleSubmit}>
-          <label>Task</label>
-          <input
-            type="text"
-            placeholder="task"
-            name="name"
-            value={newTask.name}
-            onChange={handleChange}
-          />
-          <label>Status</label>
-          <input
-            type="text"
-            placeholder="status"
-            name="status"
-            value={newTask.status}
-            onChange={handleChange}
-          />
-          <label>Priority</label>
-          <input
-            type="text"
-            placeholder="Priority"
-            name="Priority"
-            value={newTask.Priority}
-            onChange={handleChange}
-          />
-          <label>Deadline Date</label>
-          <input
-            type="text"
-            placeholder="Date"
-            name="date"
-            value={newTask}
-            onChange={handleChange}
-          />
-
-          <button type="submit">add task </button>
-          <button onClick={closeModal}>close</button>
-        </form>
-      </Modal>
+      <h1 style={{ color: "green" }}>Today </h1>
+      <list>{todayTasksList}</list>
+      <Modal />
+      <h1 style={{ color: "red" }}>Future</h1>
+      <list>{futureTasksList}</list>
+      <h1 style={{ color: "black" }}>Finished Task</h1>
+      <list>{finishedTask}</list>
+      <h1 style={{ color: "black" }}>UnFinished Task</h1>
+      <list>{unFinishedTask}</list>
     </section>
   );
 };

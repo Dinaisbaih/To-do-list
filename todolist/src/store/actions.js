@@ -18,16 +18,19 @@ export const deleteTask = (taskId) => {
   };
 };
 
-export const finishedTask = (status, taskId) => {
+export const finishedTask = (task) => {
+  console.log(task);
   return async (dispatch) => {
     try {
+      // task.status = !task.status;
       const res = await axios.put(
-        `http://localhost:8000/tasks/${taskId}`,
-        status
+        `http://localhost:8000/tasks/${task.id}`,
+        task
       );
+      console.log(res.data, "omaaaar");
       dispatch({
         type: FINISHED_TASK,
-        payload: { status, taskId },
+        payload: { task: res.data },
       });
     } catch (error) {
       console.log(error);
@@ -41,7 +44,7 @@ export const addTask = (newTask) => {
       const res = await axios.post("http://localhost:8000/tasks", newTask);
       dispatch({
         type: ADD_TASK,
-        payload: { newTask },
+        payload: { newTask: res.data },
       });
     } catch (error) {
       console.log(error);
